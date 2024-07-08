@@ -26,25 +26,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Set up Go environment
-      uses: actions/setup-go@v5
-      with:
-        go-version-file: go.mod
-
-    - name: Cache Go modules
-      uses: actions/cache@v4
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-mod-
-
-    - name: Build kube-linter binary
-      run: |
-        go build -o kube-linter cmd/kube-linter/main.go
-
     - name: Run kube-linter
       run: |
+        curl -Lo kube-linter https://github.com/stackrox/kube-linter/releases/latest/download/kube-linter-linux-amd64
+        chmod +x kube-linter
         ./kube-linter lint 00privileges.yaml > kube_linter_output.txt
       continue-on-error: true
 
@@ -61,8 +46,8 @@ jobs:
     - name: Run Checkov
       uses: bridgecrewio/checkov-action@master
       with:
-        directory: .  # Adjust to the directory where your config files are located
-        framework: all  # You can specify a particular framework if needed
+        directory: .
+        framework: all
       continue-on-error: true
 
     - name: Run kube-score
@@ -77,5 +62,5 @@ jobs:
         path: |
           kube_linter_output.txt
           polaris_output.txt
-          checkov-report.json  # Adjust if Checkov outputs a different file
+          checkov-report.json
           kube_score_output.txt
