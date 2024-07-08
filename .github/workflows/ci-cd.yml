@@ -14,10 +14,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.x'
 
@@ -26,19 +26,43 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Set up Go environment
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-mod-
+
+    - name: Build kube-linter binary
+      run: |
+        go build -o kube-linter cmd/kube-linter/main.go
+
     - name: Run kube-linter
       run: |
-        kube-linter lint 00privileges.yaml > kube_linter_output.txt
+        ./kube-linter lint 00privileges.yaml > kube_linter_output.txt
       continue-on-error: true
 
-    - name: Run polaris
+    - name: Setup Polaris
+      uses: fairwindsops/polaris/.github/actions/setup-polaris@master
+      with:
+        version: 5.0.0
+
+    - name: Run Polaris
       run: |
-        docker run --rm -v $(pwd):/project quay.io/fairwinds/polaris:3.2 audit --audit-path 00privileges.yaml > polaris_output.txt
+        polaris audit --audit-path 00privileges.yaml > polaris_output.txt
       continue-on-error: true
 
-    - name: Run checkov
-      run: |
-        checkov -f 00privileges.yaml > checkov_output.txt
+    - name: Run Checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: .  # Adjust to the directory where your config files are located
+        framework: all  # You can specify a particular framework if needed
       continue-on-error: true
 
     - name: Run kube-score
@@ -53,5 +77,5 @@ jobs:
         path: |
           kube_linter_output.txt
           polaris_output.txt
-          checkov_output.txt
+          checkov-report.json  # Adjust if Checkov outputs a different file
           kube_score_output.txt
