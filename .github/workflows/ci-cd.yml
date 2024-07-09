@@ -49,8 +49,8 @@ jobs:
       with:
         file: yamls/00privileges.yaml  # Especificar el archivo directamente
         framework: kubernetes  # Puedes especificar un framework particular si es necesario
-        output_format: csv
-        output_file_path: checkov_output.csv
+        # output_format: csv default sarif
+        output_file_path: . #checkov_output.csv crea directorio
       continue-on-error: true
 
 
@@ -66,5 +66,5 @@ jobs:
         path: |
           kube_linter_output.txt
           polaris_output.txt
-          checkov_output.csv
+          results_sarif.sarif
           kube_score_output.txt
