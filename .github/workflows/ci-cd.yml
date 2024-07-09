@@ -50,7 +50,7 @@ jobs:
         file: yamls/00privileges.yaml  # Especificar el archivo directamente
         framework: kubernetes  # Puedes especificar un framework particular si es necesario
         # output_format: csv default sarif
-        output_file_path: . #checkov_output.csv crea directorio
+        #output_file_path: . #checkov_output.csv crea directorio
       continue-on-error: true
 
 
