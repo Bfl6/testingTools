@@ -27,9 +27,10 @@ jobs:
         pip install -r requirements.txt
 
     - name: Scan yaml with kube-linter
-      uses: stackrox/kube-linter-action@v1
+      uses: stackrox/kube-linter-action@v1.0.4
       with:
-        directory: yamls  # Ajusta al directorio donde están tus archivos de configuración
+        directory: yamls # Ajusta al directorio donde están tus archivos de configuración
+        format: plain
       continue-on-error: true
 
     - name: Save kube-linter output
@@ -51,8 +52,7 @@ jobs:
       with:
         file: yamls/00privileges.yaml  # Especificar el archivo directamente
         framework: kubernetes  # Puedes especificar un framework particular si es necesario
-        output_format: json
-        output_file_path: checkov_output.json
+        output_file_path: checkov_output.txt
       continue-on-error: true
 
     - name: Save Checkov output
@@ -69,7 +69,7 @@ jobs:
       with:
         name: validation-results
         path: |
-          kube-linter.sarif
+          kube_linter_output.txt
           polaris_output.txt
           checkov_output.json
           kube_score_output.txt
