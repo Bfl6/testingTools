@@ -30,11 +30,8 @@ jobs:
       uses: stackrox/kube-linter-action@v1.0.4
       with:
         directory: yamls # Ajusta al directorio donde están tus archivos de configuración
-        format: plain
-      continue-on-error: true
-
-    - name: Save kube-linter output
-      run: kube-linter lint yamls/00privileges.yaml > kube_linter_output.txt
+        #format: plain default -> plain
+        output-file: kube_linter_output.txt #Sino con .log
       continue-on-error: true
 
     - name: Setup Polaris
@@ -52,12 +49,10 @@ jobs:
       with:
         file: yamls/00privileges.yaml  # Especificar el archivo directamente
         framework: kubernetes  # Puedes especificar un framework particular si es necesario
-        output_file_path: checkov_output.txt
+        output: csv
+        output_file_path: checkov_output.csv
       continue-on-error: true
 
-    - name: Save Checkov output
-      run: checkov -f yamls/00privileges.yaml > checkov_output.txt
-      continue-on-error: true
 
     - name: Run kube-score
       run: |
@@ -71,5 +66,6 @@ jobs:
         path: |
           kube_linter_output.txt
           polaris_output.txt
-          checkov_output.json
+          checkov_output.csv
           kube_score_output.txt
+          kube-linter.log
