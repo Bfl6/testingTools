@@ -30,7 +30,6 @@ jobs:
       uses: stackrox/kube-linter-action@v1.0.4
       with:
         directory: yamls  # Ajusta al directorio donde están tus archivos de configuración
-        config: .kube-linter/config.yaml
         format: sarif
         output-file: kube-linter.sarif
       continue-on-error: true
@@ -42,7 +41,7 @@ jobs:
 
     - name: Run Polaris
       run: |
-        polaris audit --audit-path /yamls/00privileges.yaml > polaris_output.txt
+        polaris audit --audit-path ./yamls/ > polaris_output.txt
       continue-on-error: true
 
     - name: Run Checkov
@@ -54,7 +53,7 @@ jobs:
 
     - name: Run kube-score
       run: |
-        docker run --rm -v $(pwd):/project zegl/kube-score:latest score /yamls/00privileges.yaml > kube_score_output.txt
+        docker run --rm -v $(pwd):/project zegl/kube-score:latest score yamls/*.yaml > kube_score_output.txt
       continue-on-error: true
 
     - name: Save validation results
