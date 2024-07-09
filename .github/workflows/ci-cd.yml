@@ -48,8 +48,11 @@ jobs:
       uses: bridgecrewio/checkov-action@master
       with:
         file: yamls/00privileges.yaml  # Especificar el archivo directamente
-        output-format: json  # Asegurando el formato de salida como JSON
-        output-file-path: checkov_output.json
+        framework: kubernetes  # Puedes especificar un framework particular si es necesario
+      continue-on-error: true
+
+    - name: Save Checkov output
+      run: checkov -f yamls/00privileges.yaml --output sarif > checkov_output.sarif
       continue-on-error: true
 
     - name: Run kube-score
@@ -64,5 +67,5 @@ jobs:
         path: |
           kube-linter.sarif
           polaris_output.txt
-          checkov_output.json
+          checkov_output.sarif
           kube_score_output.txt
